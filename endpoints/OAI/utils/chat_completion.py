@@ -254,10 +254,9 @@ async def format_messages_with_template(
 
 # The tag mechanism and cut logic are ported from render_jinja_template in
 # huggingface/transformers (src/transformers/utils/chat_template_utils.py,
-# Apache License 2.0) and follow that source closely so the two
-# implementations stay behavior identical. The trailing space is part of the
-# tag. After rendering, its survival tells us whether the template preserves
-# trailing whitespace in message content or trims it.
+# Apache License 2.0). The trailing space is part of the tag.
+# _cut_prompt_at_continue_tag uses its survival through rendering to detect
+# templates that trim trailing whitespace from message content.
 CONTINUE_FINAL_MESSAGE_TAG = "CONTINUE_FINAL_MESSAGE_TAG "
 
 
@@ -294,9 +293,7 @@ def _mark_continued_final_message(data: ChatCompletionRequest) -> str:
                 "continue_final_message is set but the final message has "
                 "no text content to continue"
             )
-        # The cut removes everything after the tag, and parts flatten in
-        # order into one string. The tag goes in a separate final part so an
-        # image after the last text part is not cut away with it.
+        # A separate final part keeps the tag after any trailing image part.
         final_message.content = final_message.content + [
             ChatCompletionMessagePart(type="text", text=CONTINUE_FINAL_MESSAGE_TAG)
         ]
@@ -362,14 +359,11 @@ async def apply_chat_template(data: ChatCompletionRequest):
             data.messages, data.template_vars
         )
 
-        # Cut the prompt back to the end of the continued message, leaving
-        # an unterminated assistant turn for generation to continue.
         if continued_message_text is not None:
             prompt = _cut_prompt_at_continue_tag(prompt, continued_message_text)
 
-        # Append response prefix if present. It composes with
-        # continue_final_message, where the prefix bytes extend the
-        # continued turn after the cut.
+        # Append response prefix if present. With continue_final_message it
+        # extends the continued turn.
         if data.response_prefix:
             if data.add_generation_prompt or data.continue_final_message:
                 prompt += data.response_prefix
