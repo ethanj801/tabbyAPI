@@ -1,7 +1,8 @@
 name: Build and publish a Docker image
 on:
   push:
-    branches: ['main']
+    branches: ['main', 'continue-final-message']
+  workflow_dispatch:
 
 concurrency:
   group: "docker-${{ github.ref }}"
@@ -21,9 +22,7 @@ jobs:
       matrix:
         include:
           - dockerfile: ./docker/Dockerfile
-            tag: latest
-          - dockerfile: ./docker/Dockerfile.cu13
-            tag: cu13
+            tag: continue-final-message
     steps:
       - uses: actions/checkout@v4
 
