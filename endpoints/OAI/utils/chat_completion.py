@@ -251,9 +251,12 @@ async def format_messages_with_template(
     return prompt, mm_embeddings, template_vars
 
 
-# The trailing space is part of the tag. After rendering, its survival tells
-# us whether the template preserves trailing whitespace in message content or
-# trims it. The mechanism mirrors render_jinja_template in HF transformers.
+# The tag mechanism and cut logic are ported from render_jinja_template in
+# huggingface/transformers (src/transformers/utils/chat_template_utils.py,
+# Apache License 2.0) and follow that source closely so the two
+# implementations stay behavior identical. The trailing space is part of the
+# tag. After rendering, its survival tells us whether the template preserves
+# trailing whitespace in message content or trims it.
 CONTINUE_FINAL_MESSAGE_TAG = "CONTINUE_FINAL_MESSAGE_TAG "
 
 
