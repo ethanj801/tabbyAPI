@@ -74,6 +74,12 @@ class ChatCompletionRequest(CommonCompletionRequest):
         description="Aliases: chat_template_kwargs",
     )
     response_prefix: Optional[str] = None
+
+    # Render the final message as an unterminated assistant turn so generation
+    # continues it. Mirrors the option of the same name in HF transformers and
+    # vLLM. Requires add_generation_prompt to be false and is mutually
+    # exclusive with response_prefix.
+    continue_final_message: Optional[bool] = False
     model: Optional[str] = None
 
     # tools is follows the format OAI schema, functions is more flexible
