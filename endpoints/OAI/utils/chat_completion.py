@@ -23,6 +23,7 @@ from common.utils import unwrap
 from endpoints.OAI.types.chat_completion import (
     ChatCompletionLogprobs,
     ChatCompletionMessage,
+    ChatCompletionMessagePart,
     ChatCompletionRequest,
     ChatCompletionRespChoice,
     ChatCompletionResponse,
@@ -287,13 +288,18 @@ def _mark_continued_final_message(data: ChatCompletionRequest) -> str:
         for part in reversed(final_message.content):
             if part.type == "text" and part.text is not None:
                 final_text = part.text
-                part.text = part.text + CONTINUE_FINAL_MESSAGE_TAG
                 break
         else:
             raise request_error(
                 "continue_final_message is set but the final message has "
                 "no text content to continue"
             )
+        # The cut removes everything after the tag, and parts flatten in
+        # order into one string. The tag goes in a separate final part so an
+        # image after the last text part is not cut away with it.
+        final_message.content = final_message.content + [
+            ChatCompletionMessagePart(type="text", text=CONTINUE_FINAL_MESSAGE_TAG)
+        ]
     else:
         raise request_error(
             "continue_final_message is set but the final message has no content to continue"
