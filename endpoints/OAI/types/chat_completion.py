@@ -77,8 +77,8 @@ class ChatCompletionRequest(CommonCompletionRequest):
 
     # Render the final message as an unterminated assistant turn so generation
     # continues it. Mirrors the option of the same name in HF transformers and
-    # vLLM. Requires add_generation_prompt to be false and is mutually
-    # exclusive with response_prefix.
+    # vLLM. Requires add_generation_prompt to be false. A response_prefix is
+    # appended verbatim after the continued turn.
     continue_final_message: Optional[bool] = False
     model: Optional[str] = None
 

@@ -269,9 +269,6 @@ def _mark_continued_final_message(data: ChatCompletionRequest) -> str:
         error_message = handle_request_error(message).error.message
         return HTTPException(422, error_message)
 
-    if data.response_prefix:
-        raise request_error("continue_final_message cannot be combined with response_prefix")
-
     if data.add_generation_prompt:
         raise request_error("continue_final_message requires add_generation_prompt to be false")
 
@@ -361,9 +358,11 @@ async def apply_chat_template(data: ChatCompletionRequest):
         if continued_message_text is not None:
             prompt = _cut_prompt_at_continue_tag(prompt, continued_message_text)
 
-        # Append response prefix if present
+        # Append response prefix if present. It composes with
+        # continue_final_message, where the prefix bytes extend the
+        # continued turn after the cut.
         if data.response_prefix:
-            if data.add_generation_prompt:
+            if data.add_generation_prompt or data.continue_final_message:
                 prompt += data.response_prefix
             else:
                 xlogger.warning(
