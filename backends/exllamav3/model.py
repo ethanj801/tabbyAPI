@@ -1185,6 +1185,7 @@ class ExllamaV3Container(BaseModelContainer):
             embeddings=mm_embeddings_content,
             return_top_tokens=params.top_logprobs,
             return_probs=bool(params.logprobs) or bool(params.top_logprobs),
+            post_sampling_probs=params.post_sampling_probs,
             max_rq_tokens=self.max_rq_tokens,
             stop_on_loop=params.get_stop_on_loop(),
             filters=grammar_handler.filters,

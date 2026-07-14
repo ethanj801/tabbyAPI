@@ -273,6 +273,17 @@ class BaseSamplerRequest(BaseModel):
         ge=0,
     )
 
+    post_sampling_probs: Optional[bool] = Field(
+        default_factory=lambda: get_default_sampler_value(
+            "post_sampling_probs", False
+        ),
+        description=(
+            "ExLlamaV3 only. Compute logprobs from the sampled distribution, after "
+            "the logit mask and sampler steps, instead of from the raw logits. Masked "
+            "or banned tokens then read as zero probability."
+        ),
+    )
+
     adaptive_target: Optional[float] = Field(
         default_factory=lambda: get_default_sampler_value("adaptive_target", 1.0)
     )
